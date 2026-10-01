@@ -1,0 +1,586 @@
+"use client";
+import { useCallback, useEffect, useState } from "react";
+import styled from "styled-components";
+import { Section } from "../../../../styles/Section";
+
+interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+interface SubSection {
+  id: string;
+  title: string;
+  description?: string;
+  image?: string;
+  items: ChecklistItem[];
+}
+
+interface MainSection {
+  id: string;
+  title: string;
+  subsections: SubSection[];
+}
+
+interface ChecklistState {
+  [itemId: string]: boolean;
+}
+
+const CHECKLIST_DATA: MainSection[] = [
+  {
+    id: "teardown",
+    title: "Teardown",
+    subsections: [
+      {
+        id: "collect-towels",
+        title: "Collect Towels",
+        items: [
+            { id: "upstairs-master-bath", text: "Upstairs Master Bathroom", completed: false },
+            { id: "upstairs-hallway-bath", text: "Upstairs Hallway Bathroom", completed: false },
+            { id: "downstairs-bath", text: "Downstairs Bathroom", completed: false },
+        ],
+      },
+      {
+        id: "strip-bed-sheets",
+        title: "Strip Bed Sheets",
+        items: [
+          { id: "strip-upstairs-master", text: "Upstairs Master Bedroom", completed: false },
+          { id: "strip-upstairs-secondary", text: "Upstairs Secondary Bedroom", completed: false },
+          { id: "strip-downstairs-master", text: "Downstairs Master Bedroom", completed: false },
+          { id: "strip-downstairs-secondary", text: "Downstairs Secondary Bedroom", completed: false },
+          { id: "strip-downstairs-trundle", text: "Downstairs Trundle Bed", completed: false },
+        ],
+      },
+      {
+        id: "start-laundry",
+        title: "Start Laundry",
+        items: [
+          { id: "start-laundry-machines", text: "Start the washing machines", completed: false },
+        ],
+      }
+    ],
+  },
+  {
+    id: "clean",
+    title: "Clean",
+    subsections: [
+      {
+        id: "hot-tub",
+        title: "Hot Tub",
+        description:
+          "Maintenance entails adding shock and chlorine tablets to maintain the clarity and smell of the water. If the water smells or is murky, it is time to replace the water. Running the jets during or after adding chemicals can help to spread and mix the chemicals. The hot tub chemicals are not instant and take effect over time, so add chemicals early and check status after the clean.",
+        items: [
+          { id: "hot-tub-chemicals", text: "Add chemicals (shock & chlorine)", completed: false },
+          { id: "hot-tub-ph", text: "Check Ph levels", completed: false },
+          { id: "hot-tub-jets", text: "Run the jets", completed: false },
+          { id: "hot-tub-heat", text: "Reduce heat to 102", completed: false },
+        ],
+      },
+      {
+        id: "kitchen",
+        title: "Kitchen",
+        items: [
+          { id: "kitchen-microwave", text: "Clean Microwave", completed: false },
+          { id: "kitchen-fridge", text: "Clean Fridge", completed: false },
+          { id: "kitchen-coffee", text: "Clean & Reset Coffee Makers", completed: false },
+          { id: "kitchen-dishwasher", text: "Empty Dishwasher", completed: false },
+          { id: "kitchen-dishes", text: "Check for Remaining Dishes (in both upstairs and downstairs sinks)", completed: false },
+          { id: "kitchen-soaps", text: "Refill Hand & Dish Soaps", completed: false },
+          { id: "kitchen-paper-towels", text: "Check / Replace Paper Towels", completed: false },
+          { id: "kitchen-sink-condition", text: "Check Condition of Sinks (for grime or remaining food)", completed: false },
+          { id: "kitchen-stove", text: "Wipe Down Stove & Countertop Surfaces", completed: false },
+          { id: "kitchen-sink-rags", text: "Place Sink Rags In Designated Spots", completed: false },
+        ],
+      },
+      {
+        id: "info-table",
+        title: "Info Table",
+        items: [
+          { id: "info-gift-cards", text: "Check / Replace Gift Cards (ensure the gift cards have Pinehurst Lodge signature)", completed: false },
+          { id: "info-photos", text: "Check Photos & Cash-Jar", completed: false },
+          { id: "info-checkout", text: "Stage The Checkout Instructions & Guest Log-Book", completed: false },
+        ],
+      },
+      {
+        id: "front-door-porch",
+        title: "Front Door / Porch",
+        items: [
+          { id: "front-door-code", text: "Set A New Guest Door Code", completed: false },
+          { id: "front-door-clear", text: "Clear Dirt / Snow / Debris", completed: false },
+        ],
+      },
+      {
+        id: "grill",
+        title: "Grill",
+        items: [
+          { id: "grill-surfaces", text: "Check cooking surfaces and remove grime with brush", completed: false },
+          { id: "grill-outside", text: "Wipe down the outside surfaces", completed: false },
+        ],
+      },
+      {
+        id: "dining-room",
+        title: "Dining Room",
+        items: [
+          { id: "dining-table", text: "Wipe Down Table & Chairs", completed: false },
+        ],
+      },
+      {
+        id: "living-room",
+        title: "Living Room",
+        items: [
+          { id: "collect-trash", text: "Check For Trash Under Furniture and On The Ground", completed: false },
+          { id: "living-tissues", text: "Check For Tissues & Moisturizer", completed: false },
+          { id: "living-blankets", text: "Fold & Stage Blankets", completed: false },
+          { id: "living-accounts", text: "Signout of Personal Accounts", completed: false },
+          { id: "living-glass-tables", text: "Wipe Glass Tables", completed: false },
+          { id: "living-remotes", text: "Stage TV & Light Remotes", completed: false },
+        ],
+      },
+      {
+        id: "fireplace",
+        title: "Fireplace",
+        items: [
+          { id: "check-fireplace-note", text: "Check Fireplace Usage Laminate Note", completed: false },
+          { id: "check-fireplace-fuel", text: "Ensure Fireplace Lighter Has Fuel", completed: false },
+          { id: "check-fireplace-ash", text: "Check / Remove Excess Fireplace Ash", completed: false },
+        ],
+      },
+      {
+        id: "master_bathroom",
+        title: "Upstairs Master Bathroom",
+        description:"",
+        items: [
+          { id: "master_bathroom-mirrors", text: "Clean the mirrors above the sink", completed: false },
+          { id: "master_bathroom-sink", text: "Clean sink & counter", completed: false },
+          { id: "master_bathroom-toilet", text: "Clean toilet", completed: false },
+          { id: "master_bathroom-shower", text: "Clean shower", completed: false },
+          { id: "master_bathroom-soaps", text: "Check hand soaps", completed: false },
+          { id: "master_bathroom-shower-soaps", text: "Check shower soaps", completed: false },
+          { id: "master_bathroom-toilet-paper", text: "Replace low toilet paper", completed: false },
+          { id: "master_bathroom-towels", text: "Replace towels (2 rolled, 1 hanging)", completed: false },
+          { id: "master_bathroom-washcloths", text: "Replace 2 washcloths (Center Sink)", completed: false },
+        ],
+      },
+      {
+        id: "downstairs_bathroom",
+        title: "Downstairs Bathroom",
+        description:"",
+        items: [
+          { id: "downstairs_bathroom-mirrors", text: "Clean the mirrors above the sink", completed: false },
+          { id: "downstairs_bathroom-sink", text: "Clean Sink & Counter", completed: false },
+          { id: "downstairs_bathroom-toilet", text: "Clean Toilet", completed: false },
+          { id: "downstairs_bathroom-shower", text: "Clean shower / bath", completed: false },
+          { id: "downstairs_bathroom-soaps", text: "Check Hand Soaps", completed: false },
+          { id: "downstairs_bathroom-shower-soaps", text: "Check Shower Soaps", completed: false },
+          { id: "downstairs_bathroom-toilet-paper", text: "Replace low toilet paper", completed: false },
+          { id: "downstairs_bathroom-towels", text: "Replace towels (2 rolled, 2 hanging)", completed: false },
+          { id: "downstairs_bathroom-washcloths", text: "Replace 2 washcloths (On Rolled)", completed: false },
+        ],
+      },
+      {
+        id: "hallway_bathroom",
+        title: "Upstairs Hallway Bathroom",
+        description:"",
+        items: [
+          { id: "hallway_bathroom-mirrors", text: "Clean the mirrors above the sink", completed: false },
+          { id: "hallway_bathroom-sink", text: "Clean sink & counter", completed: false },
+          { id: "hallway_bathroom-toilet", text: "Clean toilet", completed: false },
+          { id: "hallway_bathroom-shower", text: "Clean shower / bath", completed: false },
+          { id: "hallway_bathroom-soaps", text: "Check hand soaps", completed: false },
+          { id: "hallway_bathroom-shower-soaps", text: "Check shower soaps", completed: false },
+          { id: "hallway_bathroom-cabinet", text: "Check white cabnet for grime on front face", completed: false },
+          { id: "hallway_bathroom-toilet-paper", text: "Replace low toilet paper", completed: false },
+          { id: "hallway_bathroom-towels", text: "Replace towels (2 rolled, 1 hanging)", completed: false },
+          { id: "hallway_bathroom-washcloths", text: "Replace 2 washcloths (On Rolled)", completed: false },
+        ],
+      },
+      {
+        id: "replace-bed-sheets",
+        title: "Replace Bed Sheets",
+        items: [
+          { id: "replace-upstairs-master", text: "Upstairs Master Bedroom", completed: false },
+          { id: "replace-upstairs-secondary", text: "Upstairs Secondary Bedroom", completed: false },
+          { id: "replace-downstairs-master", text: "Downstairs Master Bedroom", completed: false },
+          { id: "replace-downstairs-secondary", text: "Downstairs Secondary Bedroom", completed: false },
+          { id: "replace-downstairs-trundle", text: "Downstairs Trundle Bed", completed: false },
+        ],
+      },
+      {
+        id: "bedroom-mints",
+        title: "Mints",
+        items: [
+          { id: "bedroom-mints-upstairs-master", text: "Upstairs Master Bedroom", completed: false },
+          { id: "bedroom-mints-upstairs-secondary", text: "Upstairs Secondary Bedroom", completed: false },
+          { id: "bedroom-mints-downstairs-master", text: "Downstairs Master Bedroom", completed: false },
+          { id: "bedroom-mints-downstairs-secondary", text: "Downstairs Secondary Bedroom", completed: false },
+        ],
+      },
+      {
+        id: "floor-cleaning",
+        title: "Floors",
+        description:"The floors need to be vacuumed and mopped. This stage also includes the floors to the bathrooms and bedrooms.",
+        items: [
+          { id: "floor-cleaning-upstairs", text: "Upstairs", completed: false },
+          { id: "floor-cleaning-downstairs", text: "Downstairs", completed: false },
+        ],
+      },
+      {
+        id: "garage",
+        title: "Garage & Waste",
+        items: [
+          { id: "recycling", text: "Empty Recycling Bin", completed: false },
+          { id: "garage-trash", text: "Check Garage Trash Bins", completed: false },
+          { id: "hiking-cooler", text: "Check / Clean Hiking Cooler", completed: false },
+        ],
+      },
+      {
+        id: "final_checks",
+        title: "Final Checks",
+        items: [
+          { id: "owner_closet-locked", text: "Lock The Owners Closet", completed: false },
+          { id: "cleaning_closet-locked", text: "Lock The Cleaning Closet", completed: false },
+          { id: "basement-locked", text: "Lock the basement door", completed: false },
+          { id: "upstairs_deck-locked", text: "Lock the deck sliding door", completed: false },
+          { id: "frontdoor-locked", text: "Lock the front door", completed: false },
+        ],
+      },
+    ],
+  },
+  {
+    id: "deep_clean",
+    title: "Deep / Comprehensive Clean",
+    subsections: [
+      {
+        id: "deep-clean-items",
+        title: "Deep Cleaning",
+        items: [
+          { id: "check-baseboards", text: "Check / Clean Baseboards", completed: false },
+          { id: "clean-upper-deck", text: "Check / Clean the Upper Deck", completed: false },
+          { id: "clean-lower-deck", text: "Check / Clean the Lower Deck", completed: false },
+          { id: "clean-windows", text: "Check / Clean Windows and Glass Doors", completed: false },
+          { id: "central-staircase", text: "Vacuum and Mop Centeral Staircase", completed: false },
+          { id: "wash-bathmats", text: "Wash Bathroom Mats", completed: false },
+          { id: "wash-comforters", text: "Wash Bedroom Comforters", completed: false },
+          { id: "hottub-water", text: "Drain & Refil Hot-tub Water", completed: false },
+          { id: "dusting", text: "Dust Extra Surfaces", completed: false },
+        ],
+      },
+    ]
+  }
+];
+
+function useChecklistState(storageKey: string) {
+  const [state, setState] = useState<ChecklistState>({});
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+      try {
+        setState(JSON.parse(stored));
+      } catch (e) {
+        console.error("Failed to parse checklist state from storage", e);
+      }
+    }
+    setMounted(true);
+  }, [storageKey]);
+
+  const saveToStorage = (newState: ChecklistState) => {
+    setState(newState);
+    localStorage.setItem(storageKey, JSON.stringify(newState));
+  };
+
+  const toggleItem = (itemId: string) => {
+    const newState = {
+      ...state,
+      [itemId]: !state[itemId],
+    };
+    saveToStorage(newState);
+  };
+
+  const resetAll = () => {
+    saveToStorage({});
+  };
+
+  return { state, mounted, toggleItem, resetAll };
+}
+
+const MainSectionTitle = styled.h2`
+  margin-top: 32px;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #333;
+  padding-bottom: 8px;
+`;
+
+const SubSectionContainer = styled.div`
+  width: 100%;
+  margin-bottom: 28px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+`;
+
+const SubSectionTitle = styled.h3`
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  &.collapsed {
+    margin: 0px;
+  }
+`;
+
+const Description = styled.pre`
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: black;
+  text-wrap: wrap;
+  &.collapsed {
+    height: 0px;
+    overflow: hidden;
+  }
+`;
+
+const Image = styled.img`
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 16px;
+`;
+
+const ItemsList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  &.collapsed {
+    height: 0px;
+    overflow: hidden;
+  }
+`;
+
+const ListItem = styled.li<{ completed: boolean }>`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 12px;
+  margin: 0 -12px;
+  text-decoration: ${(p) => (p.completed ? "line-through" : "none")};
+  color: ${(p) => (p.completed ? "#999" : "#333")};
+  cursor: pointer;
+  border-radius: 4px;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+`;
+
+const Checkbox = styled.input`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
+`;
+
+const ItemText = styled.span`
+  flex: 1;
+  font-size: 14px;
+`;
+
+const ControlsBar = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 2px solid #333;
+`;
+
+const Stats = styled.div`
+  font-size: 14px;
+  color: #666;
+`;
+
+const ResetBtn = styled.button`
+  padding: 10px 16px;
+  background-color: #999;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+
+  &:hover {
+    background-color: #777;
+  }
+`;
+
+const RemainingTasksSection = styled.div`
+  width: 100%;
+  margin-top: 32px;
+  padding: 20px;
+  background: #f0f0f0;
+  border-radius: 8px;
+`;
+
+const RemainingTasksTitle = styled.h2`
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+`;
+
+const RemainingTasksList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const RemainingTaskItem = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: white;
+  border-left: 3px solid #999;
+  border-radius: 2px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+`;
+
+export function ClientContent() {
+  const { state, mounted, toggleItem, resetAll:resetAllChecklist } = useChecklistState("cleaning-checklist-v2");
+  const [collapsed, _setCollapsed] = useState<{[key:string]:boolean|undefined}>({})
+  const setCollapsed = useCallback((id: string, val:boolean) => {
+    _setCollapsed({
+      ...collapsed,
+      [id]: val
+    })
+  }, [collapsed])
+  const resetAll = useCallback(() => {
+    resetAllChecklist()
+    _setCollapsed({});
+  }, [resetAllChecklist])
+
+  if (!mounted) return null;
+
+  const totalItems = CHECKLIST_DATA.reduce(
+    (sum, section) =>
+      sum + section.subsections.reduce((subSum, subsection) => subSum + subsection.items.length, 0),
+    0
+  );
+
+  const completedItems = Object.values(state).filter(Boolean).length;
+
+  const remainingTasks = CHECKLIST_DATA.flatMap((section) =>
+    section.subsections.flatMap((subsection) =>
+      subsection.items
+        .filter((item) => !state[item.id])
+        .map((item) => ({ ...item, sectionTitle: section.title, subsectionTitle: subsection.title }))
+    )
+  );
+
+  return (
+    <>
+      <main>
+        <Section varient={2}>
+          <h1 className="section-heading">Pinehurst Lodge Cleaning Checklist</h1>
+        </Section>
+        <Section varient={2}>
+          <ControlsBar>
+            <Stats>
+              {completedItems} of {totalItems} items completed
+            </Stats>
+            {completedItems > 0 && (
+              <ResetBtn onClick={resetAll}>Reset All</ResetBtn>
+            )}
+          </ControlsBar>
+          {CHECKLIST_DATA.map((mainSection) => (
+            <div key={mainSection.id} style={{width:"100%"}}>
+              <MainSectionTitle>{mainSection.title}</MainSectionTitle>
+
+              {mainSection.subsections.map((subsection) => {
+                const isComplete = subsection.items.filter(item => !state[item.id]).length === 0;
+                if (isComplete) console.log("isComplete", subsection.title)
+                const isCollapsed = collapsed[subsection.id] === undefined ? isComplete : collapsed[subsection.id];
+                return (
+                  <SubSectionContainer key={subsection.id} className={isCollapsed ? "collapsed" : ""} onClick={() => setCollapsed(subsection.id, !isCollapsed)}>
+                    <SubSectionTitle className={isCollapsed ? "collapsed" : ""}>
+                      <Checkbox
+                          type="checkbox"
+                        checked={isComplete}
+                        style={{marginRight:10}}
+                        />
+                      {subsection.title}
+                    </SubSectionTitle>
+                    {subsection.description && (
+                      <Description className={isCollapsed ? "collapsed" : ""}>{subsection.description}</Description>
+                    )}
+                    {subsection.image && <Image src={subsection.image} alt={subsection.title} />}
+                    <ItemsList className={isCollapsed ? "collapsed" : ""} onClick={(e)=>e.stopPropagation()}>
+                      {subsection.items.map((item) => (
+                        <ListItem key={item.id} completed={!!state[item.id]} onClick={() => toggleItem(item.id)}>
+                          <Checkbox
+                            type="checkbox"
+                            checked={!!state[item.id]}
+                            onChange={() => toggleItem(item.id)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <ItemText>{item.text}</ItemText>
+                        </ListItem>
+                      ))}
+                    </ItemsList>
+                  </SubSectionContainer>
+                )
+              })}
+            </div>
+          ))}
+
+          <ControlsBar>
+            <Stats>
+              {completedItems} of {totalItems} items completed
+            </Stats>
+            {completedItems > 0 && (
+              <ResetBtn onClick={resetAll}>Reset All</ResetBtn>
+            )}
+          </ControlsBar>
+           {remainingTasks.length > 0 && (
+            <RemainingTasksSection>
+              <RemainingTasksTitle>Remaining Tasks ({remainingTasks.length})</RemainingTasksTitle>
+              <RemainingTasksList>
+                {remainingTasks.map((task) => (
+                  <RemainingTaskItem key={task.id} onClick={() => toggleItem(task.id)}>
+                    <Checkbox
+                      type="checkbox"
+                      checked={!!state[task.id]}
+                      onChange={() => toggleItem(task.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span>{task.text}</span>
+                    <span style={{ fontSize: '12px', color: '#666', marginLeft: 'auto' }}>{task.subsectionTitle}</span>
+                  </RemainingTaskItem>
+                ))}
+              </RemainingTasksList>
+            </RemainingTasksSection>
+          )}
+        </Section>
+      </main>
+    </>
+  );
+}

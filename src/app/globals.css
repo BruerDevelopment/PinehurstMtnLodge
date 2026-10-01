@@ -1,0 +1,101 @@
+@tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+  @layer base {
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 224 71.4% 4.1%;
+
+      --card: 0 0% 100%;
+      --card-foreground: 224 71.4% 4.1%;
+
+      --popover: 0 0% 100%;
+      --popover-foreground: 224 71.4% 4.1%;
+
+      --primary: 220.9 39.3% 11%;
+      --primary-foreground: 210 20% 98%;
+
+      --secondary: 220 14.3% 95.9%;
+      --secondary-foreground: 220.9 39.3% 11%;
+
+      --muted: 220 14.3% 95.9%;
+      --muted-foreground: 220 8.9% 46.1%;
+
+      --accent: 220 14.3% 95.9%;
+      --accent-foreground: 220.9 39.3% 11%;
+
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 210 20% 98%;
+
+      --border: 220 13% 91%;
+      --input: 220 13% 91%;
+      --ring: 224 71.4% 4.1%;
+
+      --radius: 0.5rem;
+    }
+    :root {
+      --ldg-bnb-background: #ffffff;
+      --ldg-bnb-border-radius: 0.42em;
+      --ldg-bnb-box-shadow: 0px 24px 54px 0px rgba(0, 0, 0, 0.1);
+      --ldg-bnb-padding: 14px;
+      --ldg-bnb-input-background: #ffffff;
+      --ldg-bnb-button-border-radius: 3.58em;
+
+      --ldg-bnb-color-primary: #2a7e77;
+      --ldg-bnb-color-primary-lighter:#95bfbb;
+      --ldg-bnb-color-primary-darker: #153f3c;
+      --ldg-bnb-color-primary-contrast: #ffffff;
+      --ldg-component-calendar-cell-selection-bg-color: #2a7e77;
+      --ldg-component-calendar-cell-selection-color: #ffffff;
+      --ldg-component-calendar-cell-selected-bg-color: #95bfbb;
+      --ldg-component-calendar-cell-selected-color: #ffffff;
+      --ldg-bnb-font-family: inherit;
+    }
+    #lodgify-book-now-box {    
+      width: 100%;
+      padding-top: 40px;
+    }
+    #lodgify-book-now-box > div {
+      justify-content: start;
+    }
+
+    .dark {
+      --background: 224 71.4% 4.1%;
+      --foreground: 210 20% 98%;
+
+      --card: 224 71.4% 4.1%;
+      --card-foreground: 210 20% 98%;
+
+      --popover: 224 71.4% 4.1%;
+      --popover-foreground: 210 20% 98%;
+
+      --primary: 210 20% 98%;
+      --primary-foreground: 220.9 39.3% 11%;
+
+      --secondary: 215 27.9% 16.9%;
+      --secondary-foreground: 210 20% 98%;
+
+      --muted: 215 27.9% 16.9%;
+      --muted-foreground: 217.9 10.6% 64.9%;
+
+      --accent: 215 27.9% 16.9%;
+      --accent-foreground: 210 20% 98%;
+
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 210 20% 98%;
+
+      --border: 215 27.9% 16.9%;
+      --input: 215 27.9% 16.9%;
+      --ring: 216 12.2% 83.9%;
+    }
+  }
+
+  @layer base {
+    * {
+      @apply border-border;
+    }
+    body {
+      @apply bg-background text-foreground;
+    }
+  }

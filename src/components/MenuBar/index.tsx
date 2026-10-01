@@ -1,0 +1,332 @@
+"use client";
+
+
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import styled, { css } from "styled-components";
+import { FaInstagram } from "react-icons/fa";
+import { IoCloseSharp } from "react-icons/io5";
+import { useScrollPos } from "@/hooks/useScrollPos";
+import { isMobile } from "../../../styles/GlobalStyles";
+function getDialog(id:string) {
+  let el: any = document.getElementById(id);
+  if (el == null) return;
+  let dialog: HTMLDialogElement = el;
+  return dialog;
+}
+export default () => {
+  let scroll = useScrollPos();
+  let pathname = usePathname();
+  let router = useRouter();
+  let searchParams = useSearchParams();
+  let [menuOpen, setMenuOpen] = useState<boolean>(false);
+  let nav = (el: any) => {
+    let href = el.getAttribute("href");
+    router.push(href)
+    setMenuOpen(false);
+    getDialog("exper_dialog")?.close();
+  }
+  let hideNav = false;
+  if (searchParams.has("hideNav")) hideNav = true;
+  if (scroll == 0 && [
+    "/",
+    "/scrapbooking-retreat",
+    "/cozy-ski-cabin",
+    "/outdoor-rec",
+  ].includes(pathname)) hideNav = true;
+  return (
+    <>
+      <Bar aria-hidden={!menuOpen} className={hideNav ? "hidden_menu" : ""}>
+        <Link href="/"><h1>Pinehurst Lodge</h1></Link>
+        <div id="spacer"></div>
+        <div id="nav">
+          <Link href="/" onClick={(e: any) => nav(e.target)}>Home</Link>
+          <MenuDropdown
+            onClick={() => {
+              getDialog("exper_dialog")?.show();
+            }}
+            onMouseEnter={() => {
+              getDialog("exper_dialog")?.show();
+            }}
+            onMouseLeave={() => {
+              getDialog("exper_dialog")?.close();
+            }}
+            
+          >
+            <Link href="/experiences" onClick={(e:any)=>nav(e.target)}>Experiences</Link>
+
+            <dialog id="exper_dialog" open={false}
+              onMouseEnter={() => {
+                getDialog("exper_dialog")?.show();
+              }}
+              onMouseLeave={() => {
+                getDialog("exper_dialog")?.close();
+              }}
+            >
+              <Link href="/outdoor-rec" onClick={(e:any)=>nav(e.target)}>Outdoor Recreation Base-Camp</Link>
+              <Link href="/scrapbooking-retreat" onClick={(e:any)=>nav(e.target)}>Scrapbooking / Crafting Retreat</Link>
+              <Link href="/cozy-ski-cabin" onClick={(e:any)=>nav(e.target)}>Cozy Ski Lodge</Link>
+            </dialog>
+          </MenuDropdown>
+          <Link href="/accommodations" onClick={(e:any)=>nav(e.target)}>Accommodations</Link>
+          <Link href="/gallery" onClick={(e:any)=>nav(e.target)}>Photo Gallery</Link>
+          <Link href="/area-guide" onClick={(e:any)=>nav(e.target)}>Area Guide</Link>
+        </div>
+        <Link id="book_now" href="https://checkout.lodgify.com/pinehurst-lodge/846898/reservation?currency=USD">Book Now</Link>
+        <Menu onClick={() => {
+          setMenuOpen(!menuOpen);
+        }}>
+          <div></div>
+          <div></div>
+          <div></div>
+        </Menu>
+      </Bar>
+      <MobileMenu data-open={menuOpen}>
+        <div id="title">
+          <h1>Pinehurst Lodge</h1>
+          <Menu onClick={() => {
+            setMenuOpen(!menuOpen);
+          }}>
+            <IoCloseSharp />
+          </Menu>
+        </div>
+        <Link href="/" onClick={(e: any) => nav(e.target)}>Home</Link>
+        <div className="subtab">
+          <Link id="header" href="/experiences" onClick={(e:any)=>nav(e.target)}>Experiences</Link>
+          <Link href="/outdoor-rec" onClick={(e:any)=>nav(e.target)}>Outdoor Recreation Base-Camp</Link>
+          <Link href="/scrapbooking-retreat" onClick={(e:any)=>nav(e.target)}>Scrapbooking / Crafting Retreat</Link>
+          <Link href="/cozy-ski-cabin" onClick={(e:any)=>nav(e.target)}>Ski Lodge</Link>
+        </div>
+        <Link href="/accommodations" onClick={(e:any)=>nav(e.target)}>Accommodations</Link>
+        <Link href="/gallery" onClick={(e:any)=>nav(e.target)}>Photo Gallery</Link>
+        <Link href="/area-guide" onClick={(e: any) => nav(e.target)}>Area Guide</Link>
+        <div id="link_buttons">
+
+          <Link href="https://checkout.lodgify.com/pinehurst-lodge/846898/reservation?currency=USD" id="book_now">Book Now</Link>
+          <Link href="https://www.instagram.com/pinehurst_lodge_co?igsh=eXo2YmRmY3U5N3pr" id="instagram"><FaInstagram />Follow Us</Link>
+        </div>
+      </MobileMenu>
+    </>
+  );
+}
+
+const MenuDropdown = styled.div`
+  position: relative;
+  dialog {
+    &[open=""] {
+      display: flex;
+    }
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    flex-direction: column;
+    background-color: var(--theme-color-5);
+    z-index: 102;
+    box-shadow: 0px 10px 10px 0px black;
+    border: 0px;
+    padding: 0px;
+    
+    a {
+      min-height: 20px;
+      padding: 10px;
+      width: 300px;
+    }
+  }
+  
+`
+
+const Menu = styled.div`
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  width: 50px;
+  min-width: 50px;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  svg {
+   width: 40px; 
+   height: 40px; 
+  }
+  div {
+    width: 100%;
+    height: 5px;
+    background-color: black;
+  }
+  ${isMobile(css`
+    display: flex;
+  `)}
+  
+`
+
+const MobileMenu = styled.div`
+  
+  position: fixed;
+  top: 0px;
+  left: 100%;
+  bottom: 0px;
+  width: 100vw;
+  z-index: 101;
+  background-color: var(--theme-color-5);
+  transition: left 0.25s;
+  display: flex;
+  flex-direction: column;
+  &[data-open="true"] {
+    left: 0px;
+  }
+  #title {
+    display: flex;
+    align-items: center;
+    padding: 0px 20px;
+    h1 {
+      flex: 1;
+      height: 30px;
+      display: flex;
+      justify-content: start;
+      align-items: center;
+      color: white;
+      text-decoration: none;
+      font-size: 30px;
+      text-shadow: var(--theme-text-shadow);
+      margin-bottom: 0px;
+    }
+  }
+  a {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-size: 30px;
+    padding: 10px 0px;
+    padding-left: 20px;
+  }
+  .subtab {
+    #header {
+      cursor: pointer;
+      width: 100%;
+      height: 50px;
+      display: flex;
+      justify-content: start;
+      align-items: center;
+      color: white;
+      font-size: 30px;
+      padding: 10px 0px;
+      padding-left: 20px;
+    }
+    a {
+      padding-left: 40px;
+      font-size: 20px;
+    }
+  }
+  #link_buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+
+    #book_now {
+      width: 60%;
+      background-color: var(--theme-color-2);
+      padding: 5px 10px;
+      color: black;
+      text-decoration: none;
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #instagram {
+      width: 60%;
+      background-color: var(--theme-color-4);
+      padding: 5px 10px;
+      color: black;
+      text-decoration: none;
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row;
+      gap: 20px;
+      color: white;
+      svg {
+        width: 30px;
+        height: 30px;
+        color: white;
+      }
+    }
+  }
+`
+const Bar = styled.div`
+  
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  height: 40px;
+  background-color: var(--theme-color-5);
+  z-index: 49;
+  box-shadow: 0px 0px 10px 0px black;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 10px;
+  &.hidden_menu {
+    display: none !important;
+  }
+  h1 {
+    text-shadow: var(--theme-text-shadow);
+    padding: 0px;
+    padding-left: 0px;
+    margin: 0px;
+    color: white;
+    font-size: 23px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    ${isMobile(css`
+      font-size: 16px;
+    `)}
+  }
+  div#nav {
+    flex: 1;
+    display: flex;
+    justify-content: end;
+    padding-right: 20px;
+    ${isMobile(css`
+      display: none;
+    `)}
+    a, div {
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
+      min-height: 20px;
+      padding: 10px;
+
+      &:hover {
+        background-color: var(--theme-color-4);
+      }
+    }
+  }
+  div#spacer {
+    flex: 1;
+    display: none;
+    ${isMobile(css`
+      display: flex;
+    `)}
+  }
+  #book_now {
+    background-color: var(--theme-color-2);
+    padding: 5px 10px;
+    color: black;
+    text-decoration: none;
+    border-radius: 6px;
+  }
+`
