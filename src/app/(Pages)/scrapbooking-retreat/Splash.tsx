@@ -25,7 +25,7 @@ export default function Splash() {
           <h1>Pinehurst Lodge</h1>
           <span>Ideal For Your Next</span>
           <h2>Scrapbooking Retreat</h2>
-          <Link href="https://checkout.lodgify.com/pinehurst-lodge/846898/reservation?currency=USD">Book Your Next Retreat Now!</Link>
+          <Link href="https://checkout.lodgify.com/pinehurstmtnlodge/846898/reservation?currency=USD">Book Your Next Retreat Now!</Link>
         </div>
         <div id="scrollIndicator">
           <h1>Explore</h1>
